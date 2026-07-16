@@ -1,10 +1,9 @@
-"""Recommendation and prediction logic combining XGBoost ranking and ChromaDB retrieval."""
+"""Recommendation and prediction logic combining score-based ranking and ChromaDB retrieval."""
 import os
 import sys
 import re
 import pandas as pd
 import numpy as np
-import joblib
 import chromadb
 import ollama
 
@@ -83,25 +82,33 @@ def extract_budget_from_query(query_str):
         
     return None
 
-def load_xgboost_model(model_path):
-    """Loads the trained XGBoost model from disk."""
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"XGBoost model not found at {model_path}. Please run train_model.py first.")
-    return joblib.load(model_path)
+def extract_year_preference(query_str):
+    """Extracts year preference from user query. Returns (year, is_older) tuple."""
+    if not query_str:
+        return None, False
+    
+    query_lower = query_str.lower()
+    found_years = [int(yr) for yr in re.findall(r'\b\d{4}\b', query_lower)]
+    
+    if any(yr < 2024 for yr in found_years):
+        return min(yr for yr in found_years if yr < 2024), True
+    
+    if any(kw in query_lower for kw in ["older", "old", "before 2024", "previous", "retro", "classic", "refurbished", "used"]):
+        return None, True
+    
+    return None, False
 
-def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, model_path=None):
+def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None):
     """
     Performs hybrid recommendation:
     1. Retrieval from ChromaDB using semantic query & metadata filtering.
     2. Filtering by budget (comparing with Launch_Price) if user specified one.
-    3. Scoring & Ranking retrieved candidates using XGBoost.
+    3. Ranking retrieved candidates using pre-computed recommendation_score.
     4. Conversational explanation generation using Llama 3.2.
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if persist_dir is None:
         persist_dir = os.path.join(script_dir, "../data/chroma_db")
-    if model_path is None:
-        model_path = os.path.join(script_dir, "../data/models/xgboost_model.joblib")
 
     # 1. Load Persona
     if persona_id not in PERSONAS:
@@ -122,15 +129,7 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
         print(f"User Query: {user_query}")
         
     # Check if user query asks for phones before 2024
-    asked_for_older = False
-    if persona_id == 6 and user_query:
-        query_lower = user_query.lower()
-        # Find any 4-digit years in the query
-        found_years = [int(yr) for yr in re.findall(r'\b\d{4}\b', query_lower)]
-        if any(yr < 2024 for yr in found_years):
-            asked_for_older = True
-        elif any(kw in query_lower for kw in ["older", "old", "before 2024", "previous", "retro", "classic", "refurbished", "used"]):
-            asked_for_older = True
+    _, asked_for_older = extract_year_preference(user_query if persona_id == 6 else "")
 
     # 2. Query ChromaDB
     print("\n[Step 2] Querying ChromaDB for candidate devices...")
@@ -168,7 +167,7 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
         results = collection.query(query_texts=[search_query], n_results=100)
         
     if not results or not results["metadatas"] or len(results["metadatas"][0]) == 0:
-        return "Sorry, no Samsung phones were found in the database matching your criteria."
+        return "Sorry, no Samsung phones were found in the database matching your criteria.", pd.DataFrame()
         
     candidates_metadata = results["metadatas"][0]
     candidates_docs = results["documents"][0]
@@ -195,46 +194,12 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
             
     if df_candidates.empty:
         budget_str = f" of {budget_limit} INR" if budget_limit else ""
-        return f"Sorry, no Samsung phones were found in the database matching your criteria within your budget{budget_str}."
+        return f"Sorry, no Samsung phones were found in the database matching your criteria within your budget{budget_str}.", pd.DataFrame()
         
-    # 3. Predict & Rank using XGBoost
-    print("\n[Step 3] Ranking candidates using the trained XGBoost model...")
-    model = load_xgboost_model(model_path)
+    # 3. Rank using pre-computed recommendation_score
+    print("\n[Step 3] Ranking candidates using recommendation score...")
     
-    # Format candidates for prediction
-    features = [
-        "ram_gb", "storage_gb", "battery_mah", "screen_size_inch", "refresh_rate_hz",
-        "main_camera_mp", "ultrawide_mp", "telephoto_mp", "front_camera_mp", "launch_year"
-    ]
-    
-    # Re-map ChromaDB metadata keys to XGBoost feature names
-    feature_mapping = {
-        "ram_gb": "RAM_GB",
-        "storage_gb": "Storage_GB",
-        "battery_mah": "Battery_mAh",
-        "screen_size_inch": "Screen_Size_Inch",
-        "refresh_rate_hz": "Refresh_Rate_Hz",
-        "main_camera_mp": "Main_Camera_MP",
-        "ultrawide_mp": "UltraWide_MP",
-        "telephoto_mp": "Telephoto_MP",
-        "front_camera_mp": "Front_Camera_MP",
-        "launch_year": "Launch_Year"
-    }
-    
-    df_candidates_mapped = df_candidates.rename(columns=feature_mapping)
-    
-    # Handle placeholder launch years
-    df_candidates_mapped["Launch_Year"] = df_candidates_mapped["Launch_Year"].replace(-1.0, np.nan)
-    
-    # Select only required features
-    X_candidates = df_candidates_mapped[[feature_mapping[f] for f in features]]
-    
-    # Predict scores
-    predicted_scores = model.predict(X_candidates)
-    
-    # Add predicted scores back and sort
-    df_candidates["predicted_score"] = predicted_scores
-    df_candidates_sorted = df_candidates.sort_values(by="predicted_score", ascending=False)
+    df_candidates_sorted = df_candidates.sort_values(by="recommendation_score", ascending=False)
     
     # Keep top 3 recommendations
     top_recommendations = df_candidates_sorted.head(3)
@@ -243,8 +208,10 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
     for i, (_, row) in enumerate(top_recommendations.iterrows()):
         launch_price_val = row.get('launch_price', -1.0)
         launch_price_str = f"{int(launch_price_val)} INR" if launch_price_val > 0 else "N/A"
-        print(f"{i+1}. {row['name']} (Launch Price: {launch_price_str}, XGBoost Predicted Score: {row['predicted_score']:.2f})")
-    print("Disclaimer: This phones recommended on the basis of launch price")
+        launch_year_val = row.get('launch_year', -1.0)
+        launch_year_str = f"{int(launch_year_val)}" if launch_year_val > 0 else "Older"
+        print(f"{i+1}. {row['name']} (Launch Year: {launch_year_str}, Launch Price: {launch_price_str}, Recommendation Score: {row['recommendation_score']:.2f})")
+    print("Disclaimer: These phones are recommended on the basis of launch price")
         
     # 4. Generate response using Llama 3.2
     print("\n[Step 4] Requesting Llama 3.2 to generate explanation...")
@@ -264,7 +231,7 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
             f"- Subsystem Scores: Performance: {row['performance_score']:.1f}/10, Camera: {row['camera_score']:.1f}/10, "
             f"Battery: {row['battery_score']:.1f}/10, Display: {row['display_score']:.1f}/10, AI: {row['ai_score']:.1f}/10, "
             f"Durability: {row['durability_score']:.1f}/10.\n"
-            f"- Overall Machine Learning Recommendation Score: {row['predicted_score']:.2f}/10.\n"
+            f"- Overall Recommendation Score: {row['recommendation_score']:.2f}/10.\n"
         )
         
     devices_context = "\n".join(context_list)
@@ -278,17 +245,17 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
     {"User's Custom Query / Budget: " + search_query if persona_id == 6 else ""}
     {f"Note: The user specifies a budget of {budget_limit} INR. The recommended devices have been filtered to fit this budget based on their launch price." if budget_limit else ""}
     
-    Based on their goal, here are the top 3 recommended Samsung devices retrieved from our system, ranked by our machine learning scoring engine:
+    Based on their goal, here are the top 3 recommended Samsung devices retrieved from our system, ranked by our recommendation scoring engine:
     
     {devices_context}
     
     Please write a friendly, highly conversational, and expert recommendation explanation for this user.
     Address them directly according to their persona.
-    For each device, explain clearly why it fits their specific goals and budget. Highlight prices (Launch Price in INR) and show how the specs directly map to their daily experience. Do NOT mention or use Current Price.
+    For each device, explain clearly why it fits their specific goals and budget. Highlight prices (Launch Price in INR) and show how the specs directly map to their daily experience.
     Avoid comparing specs in a dry, technical table; explain the real-world value of these specs to their daily experience.
     Keep the tone premium, helpful, and concise. Make sure to structure the recommendations clearly.
     
-    IMPORTANT: You MUST include this disclaimer at the end of your recommendation: "This phones recommended on the basis of launch price"
+    IMPORTANT: You MUST include this disclaimer at the end of your recommendation: "These phones are recommended on the basis of launch price"
     """
     
     try:
@@ -297,10 +264,10 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
             {'role': 'user', 'content': llm_prompt}
         ])
         explanation = response['message']['content']
-        disclaimer = "This phones recommended on the basis of launch price"
+        disclaimer = "These phones are recommended on the basis of launch price"
         if disclaimer not in explanation:
             explanation += f"\n\nDisclaimer: {disclaimer}"
-        return explanation
+        return explanation, df_candidates_sorted
     except Exception as e:
         print(f"Error calling local Llama 3.2 via Ollama: {e}")
         print("Falling back to a rules-based explanation template.")
@@ -309,10 +276,10 @@ def query_and_rank_recommendations(persona_id, user_query="", persist_dir=None, 
         for i, (_, row) in enumerate(top_recommendations.iterrows()):
             launch_price_val = row.get('launch_price', -1.0)
             launch_price_str = f"{int(launch_price_val)} INR" if launch_price_val > 0 else "N/A"
-            explanation += f"**{i+1}. {row['name']}** (Launch Price: {launch_price_str}, Score: {row['predicted_score']:.2f}/10)\n"
+            explanation += f"**{i+1}. {row['name']}** (Launch Price: {launch_price_str}, Score: {row['recommendation_score']:.2f}/10)\n"
             explanation += f"- Why it fits: This device offers strong {row['target_segment'].lower()} capabilities, a performance score of {row['performance_score']:.1f}/10, and a camera score of {row['camera_score']:.1f}/10.\n\n"
-        explanation += "\nDisclaimer: This phones recommended on the basis of launch price\n"
-        return explanation
+        explanation += "\nDisclaimer: These phones are recommended on the basis of launch price\n"
+        return explanation, df_candidates_sorted
 
 def interactive_cli():
     print("=" * 60)
@@ -335,12 +302,54 @@ def interactive_cli():
                 print("Query cannot be empty.")
                 return
                 
-        explanation = query_and_rank_recommendations(choice, user_query)
+        result = query_and_rank_recommendations(choice, user_query)
+        if type(result) == tuple:
+            explanation, df_candidates = result
+        else:
+            explanation, df_candidates = result, pd.DataFrame()
+            
         print("\n" + "=" * 60)
-        print("RECOMMENDATION DECISION REPORT (Llama 3.2 + XGBoost)")
+        print("RECOMMENDATION DECISION REPORT")
         print("=" * 60)
         print(explanation)
         print("=" * 60)
+        
+        if not df_candidates.empty:
+            show_ranking = input("\nWould you like to see the ranking of these candidates based on a specific feature? (y/n): ").strip().lower()
+            if show_ranking == 'y':
+                print("\nRanking Basis Options:")
+                ranking_options = {
+                    1: ("Recommendation Score", "recommendation_score", False),
+                    2: ("Performance Score", "performance_score", False),
+                    3: ("Camera Score", "camera_score", False),
+                    4: ("Battery Score", "battery_score", False),
+                    5: ("Display Score", "display_score", False),
+                    6: ("AI Score", "ai_score", False),
+                    7: ("Durability Score", "durability_score", False),
+                    8: ("Launch Price (Low to High)", "launch_price", True),
+                    9: ("Launch Year (New to Old)", "launch_year", False)
+                }
+                for k, v in ranking_options.items():
+                    print(f"{k}. {v[0]}")
+                
+                try:
+                    basis_choice = int(input("\nEnter choice (1-9): ").strip())
+                    if basis_choice in ranking_options:
+                        basis_name, basis_col, ascending = ranking_options[basis_choice]
+                        
+                        print(f"\nTop 10 Candidates Ranked by {basis_name}:")
+                        ranked_df = df_candidates.sort_values(by=basis_col, ascending=ascending)
+                        for i, (_, row) in enumerate(ranked_df.head(10).iterrows()):
+                            launch_price_val = row.get('launch_price', -1.0)
+                            launch_price_str = f"{int(launch_price_val)} INR" if launch_price_val > 0 else "N/A"
+                            launch_year_val = row.get('launch_year', -1.0)
+                            launch_year_str = f"{int(launch_year_val)}" if launch_year_val > 0 else "Older"
+                            score_val = row.get(basis_col, 0)
+                            print(f"{i+1}. {row['name']} | Year: {launch_year_str} | Price: {launch_price_str} | {basis_name}: {score_val:.2f}")
+                    else:
+                        print("Invalid choice. Skipping ranking.")
+                except ValueError:
+                    print("Invalid input. Skipping ranking.")
         
     except ValueError as ve:
         print(f"Error: {ve}")
@@ -354,8 +363,11 @@ if __name__ == "__main__":
         try:
             pid = int(sys.argv[1])
             q = sys.argv[2] if len(sys.argv) > 2 else ""
-            resp = query_and_rank_recommendations(pid, q)
-            print(resp)
+            result = query_and_rank_recommendations(pid, q)
+            if type(result) == tuple:
+                print(result[0])
+            else:
+                print(result)
         except Exception as ex:
             print(f"Error: {ex}")
     else:

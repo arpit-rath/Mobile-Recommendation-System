@@ -8,3 +8,5 @@ jupyter
 notebook
 joblib
 python-dotenv
+chromadb
+ollama

@@ -82,9 +82,7 @@ def populate_chromadb(df, collection):
             "durability_score": float(row["durability_score"]),
             "recommendation_score": float(row["recommendation_score"]),
             "launch_year": float(row["Launch_Year"]) if not pd.isna(row["Launch_Year"]) else -1.0,
-            "launch_price": float(row["Launch_Price"]) if not pd.isna(row["Launch_Price"]) else -1.0,
-            "current_price": str(row["Current_Price"]),
-            "current_price_val": float(row["Current_Price"]) if str(row["Current_Price"]).strip().upper() != "N/A" and not pd.isna(row["Current_Price"]) else -1.0
+            "launch_price": float(row["Launch_Price"]) if not pd.isna(row["Launch_Price"]) else -1.0
         }
         
         documents.append(doc)

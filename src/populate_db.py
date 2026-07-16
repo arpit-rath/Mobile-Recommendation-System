@@ -6,7 +6,7 @@ from utils import get_chroma_client, get_or_create_collection, populate_chromadb
 def run_db_population(dataset_path, persist_dir):
     print(f"Reading engineered dataset from: {dataset_path}")
     if not os.path.exists(dataset_path):
-        raise FileNotFoundError(f"Engineered dataset not found at {dataset_path}. Please run feature_engineering.py first.")
+        raise FileNotFoundError(f"Engineered dataset not found at {dataset_path}. Please run notebooks/05_Feature_Engineering.ipynb first.")
         
     df = pd.read_csv(dataset_path)
     print(f"Dataset loaded with {len(df)} records.")

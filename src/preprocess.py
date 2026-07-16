@@ -55,7 +55,7 @@ def clean_dataset(input_path, output_path):
 if __name__ == "__main__":
     # Default paths for execution
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_file = os.path.join(script_dir, "../data/interim/SamsungPhoneData_Updated.csv")
+    input_file = os.path.join(script_dir, "../data/raw/SamsungPhoneData.csv")
     output_file = os.path.join(script_dir, "../data/processed/cleaned_dataset.csv")
     
     # Run the cleaning pipeline

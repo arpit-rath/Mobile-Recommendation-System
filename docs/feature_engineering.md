@@ -215,13 +215,11 @@ These additions would make the recommendation engine more comprehensive and bett
 
 ```mermaid
 flowchart TD
-    A[Raw Dataset] --> B[Dataset Expansion]
-    B --> C[Data Cleaning]
-    C --> D[EDA]
-    D --> E[Feature Engineering]
-    E --> F[ML Recommendation Model]
-    F --> G[LLM Recommendation Engine]
-    G --> H[React UI]
+    A[Raw Dataset] --> B[Data Cleaning]
+    B --> C[EDA]
+    C --> D[Feature Engineering]
+    D --> E[ChromaDB Population]
+    E --> F[LLM Recommendation Engine]
 ```
 
 ---
