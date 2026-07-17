@@ -141,9 +141,15 @@
                 <li class="step" data-step="4">Generating conversational expert explanation...</li>
             </ul>
         </section>
-        <!-- Results Section -->
         <section class="results-section" id="resultsSection" style="display: none;">
             
+            <!-- Top 3 Recommendations Cards -->
+            <div class="recommendations-container">
+                <h2>Top 3 Recommendations</h2>
+                <div class="cards-grid" id="recommendationsGrid">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
             <!-- Conversational Analysis Card -->
             <div class="analysis-container">
                 <div class="analysis-header">
@@ -159,13 +165,6 @@
                 </div>
                 <div class="analysis-body" id="explanationText">
                     <!-- Loaded dynamically -->
-                </div>
-            </div>
-            <!-- Top 3 Recommendations Cards -->
-            <div class="recommendations-container">
-                <h2>Top 3 Recommendations</h2>
-                <div class="cards-grid" id="recommendationsGrid">
-                    <!-- Rendered dynamically -->
                 </div>
             </div>
             <!-- Candidate Sorting Dashboard -->

@@ -30,3 +30,6 @@ images/*
 
 # VS Code
 .vscode/
+
+# System Files
+.DS_Store
