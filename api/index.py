@@ -47,7 +47,7 @@ if IMPORT_ERROR:
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>', methods=['GET', 'POST'])
     def catch_all(path):
-        return jsonify({"error": "Vercel Boot Error", "traceback": IMPORT_ERROR}), 500
+        return jsonify({"error": f"Vercel Boot Error: {IMPORT_ERROR}"}), 500
 else:
     @app.route('/')
     def index():
