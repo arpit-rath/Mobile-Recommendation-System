@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung Galaxy Recommend - Intelligent Mobile Recommendation System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Samsung Logo on the top left corner -->
+    <div class="top-samsung-logo">SAMSUNG</div>
+    <!-- Premium background glow elements -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="brand">GALAXY GENIE</span>
+            </div>
+            <h1 class="main-title">Smarter Choices. Better Galaxy Experience.</h1>
+            <p class="tagline">Experience hassle-free smartphone shopping with personalized Samsung Galaxy recommendations. Using an intelligent weighted scoring model, we match your preferences with the most suitable Galaxy devices.</p>
+        </header>
+        <!-- Persona Selection Section -->
+        <section class="persona-section">
+            <h2>Explore the Right Galaxy</h2>
+            <p class="section-desc">Select a persona matching your daily smartphone goals to retrieve tailored recommendations.</p>
+            
+            <div class="persona-grid" id="personaGrid">
+                <!-- Persona Card 1 -->
+                <div class="persona-card" data-persona="1">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Power User</h3>
+                    <p class="persona-goal">Own the absolute fastest, most future-proof flagship smartphone available.</p>
+                </div>
+                <!-- Persona Card 2 -->
+                <div class="persona-card" data-persona="2">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 5H9.5C8.5 5 7 6 7 8C7 10 9 11 11 12C13 13 15 14 15 16C15 18 13.5 19 12.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Conscious Optimizer</h3>
+                    <p class="persona-goal">Find a highly capable device at the lowest possible price point.</p>
+                </div>
+                <!-- Persona Card 3 -->
+                <div class="persona-card" data-persona="3">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23 19C23 19.55 22.55 20 22 20H2C1.45 20 1 19.55 1 19V8C1 7.45 1.45 7 2 7H6L8 4H16L18 7H22C22.55 7 23 7.45 23 8V19Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Content Creator</h3>
+                    <p class="persona-goal">Capture professional-grade photos & videos with advanced camera setups.</p>
+                </div>
+                <!-- Persona Card 4 -->
+                <div class="persona-card" data-persona="4">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>The Minimalist</h3>
+                    <p class="persona-goal">A reliable, uncomplicated device with long battery life & clear display.</p>
+                </div>
+                <!-- Persona Card 5 -->
+                <div class="persona-card" data-persona="5">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 12H2V18C2 19.1 2.9 20 4 20H8C9.1 20 10 19.1 10 18V12H6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M18 12H14V18C14 19.1 14.9 20 16 20H20C21.1 20 22 19.1 22 18V12H18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M6 12V4C6 2.9 6.9 2 8 2H16C17.1 2 18 2.9 18 4V12H6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="9" cy="7" r="1" fill="currentColor"/>
+                            <circle cx="15" cy="7" r="1" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3>Mobile Gamer</h3>
+                    <p class="persona-goal">Play graphics-heavy mobile games smoothly with lag-free performance.</p>
+                </div>
+                <!-- Persona Card 6 -->
+                <div class="persona-card" data-persona="6">
+                    <div class="persona-icon-container">
+                        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Custom Search</h3>
+                    <p class="persona-goal">Define custom requirements, features, launch year, or specific budgets.</p>
+                </div>
+            </div>
+            <!-- Custom Search Panel (Hidden initially) -->
+            <div class="search-panel" id="searchPanel" style="display: none;">
+                <div class="search-bar-wrapper">
+                    <input type="text" id="customQuery" placeholder="e.g., flagship model under 70000 INR with 12GB RAM and launch year 2024">
+                    <button id="searchBtn">
+                        <span>Retrieve Recommendations</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-tip"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="search-suggestions">
+                    <span class="suggestion-label">Suggestions:</span>
+                    <button class="suggestion-tag">under 35000 INR with fast charging</button>
+                    <button class="suggestion-tag">S24 with 256GB storage</button>
+                    <button class="suggestion-tag">phones before 2024 under 50000</button>
+                    <button class="suggestion-tag">12GB RAM with premium camera</button>
+                </div>
+            </div>
+        </section>
+        <!-- Loading Pipeline Animation -->
+        <section class="loading-section" id="loadingSection" style="display: none;">
+            <div class="spinner-container">
+                <div class="galaxy-spinner">
+                    <div class="ring ring-outer"></div>
+                    <div class="ring ring-middle"></div>
+                    <div class="ring ring-inner"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            <h3>Pipeline Evaluation in Progress</h3>
+            <ul class="pipeline-steps" id="pipelineSteps">
+                <li class="step active" data-step="0">Initializing semantic vector db connection...</li>
+                <li class="step" data-step="1">Parsing target segment parameters & filters...</li>
+                <li class="step" data-step="2">Performing ChromaDB semantic retrieval...</li>
+                <li class="step" data-step="3">Evaluating hardware subsystem scores...</li>
+                <li class="step" data-step="4">Generating conversational expert explanation...</li>
+            </ul>
+        </section>
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            
+            <!-- Conversational Analysis Card -->
+            <div class="analysis-container">
+                <div class="analysis-header">
+                    <div class="expert-avatar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 6C13.66 6 15 7.34 15 9C15 10.66 13.66 12 12 12C10.34 12 9 10.66 9 9C9 7.34 10.34 6 12 6ZM12 20.2C9.3 20.2 6.9 18.83 5.5 16.74C5.53 14.59 9.83 13.4 12 13.4C14.16 13.4 18.47 14.59 18.5 16.74C17.1 18.83 14.7 20.2 12 20.2Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Galaxy Expert Analysis</h3>
+                        <span id="personaDisplay">Persona: The Power User</span>
+                    </div>
+                </div>
+                <div class="analysis-body" id="explanationText">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+            <!-- Top 3 Recommendations Cards -->
+            <div class="recommendations-container">
+                <h2>Top 3 Recommendations</h2>
+                <div class="cards-grid" id="recommendationsGrid">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+            <!-- Candidate Sorting Dashboard -->
+            <div class="dashboard-container" id="dashboardContainer">
+                <div class="dashboard-header animate-header">
+                    <h2>Matched Galaxy Candidates</h2>
+                    <div class="sorting-controls-wrapper">
+                        <span class="controls-label">Sort candidates by (Select multiple in order of preference):</span>
+                        <div class="multi-sort-options" id="multiSortOptions">
+                            <button class="sort-pill" data-field="recommendation_score" data-asc="false">
+                                <span>Recommendation Score</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="performance_score" data-asc="false">
+                                <span>Performance</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="camera_score" data-asc="false">
+                                <span>Camera</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="battery_score" data-asc="false">
+                                <span>Battery</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="display_score" data-asc="false">
+                                <span>Display</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="ai_score" data-asc="false">
+                                <span>Galaxy AI</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="durability_score" data-asc="false">
+                                <span>Durability</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="launch_price" data-asc="true">
+                                <span>Price (Low to High)</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                            <button class="sort-pill" data-field="launch_year" data-asc="false">
+                                <span>Launch Year</span>
+                                <span class="priority-badge"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="candidates-table-wrapper">
+                    <table class="candidates-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Model Name</th>
+                                <th>Launch Year</th>
+                                <th>Launch Price</th>
+                                <th>Overall Score</th>
+                                <th>Main Specs (RAM/Storage/Battery)</th>
+                                <th>Scores (Perf / Cam / Batt)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidatesTableBody">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </section>
+    </div>
+    <!-- Footer -->
+    <footer>
+        <p>Samsung Smartphone Recommendation Engine. Powered by ChromaDB Semantic Retriever & Llama 3.2.</p>
+        <p class="disclaimer-note">Recommendations may vary. Verify specifications before purchase.</p>
+        <p class="alchemy-powered">Powered by Alchemy</p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
