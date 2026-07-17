@@ -1,7 +1,7 @@
 numpy
 pandas
 python-dotenv
-chromadb==0.4.24
+chromadb>=0.5.3
 google-genai
 pysqlite3-binary
 # flask is only needed for local development (FRONTEND/server.py), not for Netlify/Vercel Functions
