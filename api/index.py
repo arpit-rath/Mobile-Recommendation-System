@@ -72,6 +72,15 @@ else:
             # Point to chroma_db relative to the repo root
             persist_dir = os.path.abspath(os.path.join(api_dir, '..', 'data', 'chroma_db'))
 
+            # Vercel functions are read-only. SQLite requires write permissions to create lock/wal files.
+            # We must copy the database to /tmp on Vercel.
+            if os.environ.get('VERCEL') or os.environ.get('AWS_EXECUTION_ENV'):
+                import shutil
+                tmp_dir = '/tmp/chroma_db'
+                if not os.path.exists(tmp_dir):
+                    shutil.copytree(persist_dir, tmp_dir)
+                persist_dir = tmp_dir
+
             explanation, df_candidates = query_and_rank_recommendations(persona_id, user_query, persist_dir=persist_dir)
             explanation = explanation.replace(
                 "These phones are recommended on the basis of launch price",
